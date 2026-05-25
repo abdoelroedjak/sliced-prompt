@@ -75,6 +75,9 @@ export default function SaaSWorkspace({ onSendToPlayground, searchQuery }: SaaSW
   // Search input by outcome/goal to easily find templates
   const [searchGoalQuery, setSearchGoalQuery] = useState<string>("");
 
+  // Difficulty filter state for beginner users ("Paling Mudah / Untuk Pemula")
+  const [selectedDifficulty, setSelectedDifficulty] = useState<"all" | "pemula">("all");
+
   // Synchronise parent seek query
   useEffect(() => {
     if (searchQuery !== undefined && searchQuery.trim() !== "") {
@@ -140,15 +143,15 @@ export default function SaaSWorkspace({ onSendToPlayground, searchQuery }: SaaSW
     }
   }, []);
 
-  // Detailed categories mappings
+  // Detailed categories mappings with custom icons and visual color accents
   const categories = [
-    { id: "paling-sering", label: "🔥 PILIH HASIL TERATAS", desc: "Paling sering dicari" },
-    { id: "pelajar", label: "🎓 PELAJAR & MAHASISWA", desc: "Tugas kuliah & sekolah" },
-    { id: "pekerja", label: "💼 PEKERJA KANTORAN", desc: "SOP, Laporan, & Notulen" },
-    { id: "umkm", label: "🏪 UMKM & LOCAL BUSINESS", desc: "Copywriting & Slogan jualan" },
-    { id: "creator", label: "📈 CONTENT CREATOR", desc: "Ide konten viral" },
-    { id: "designer", label: "🎨 UNTUK DESIGNER", desc: "Brief logo & brand direction" },
-    { id: "coding", label: "💻 PROGRAMMER & TEKNIS", desc: "Debug & API" }
+    { id: "paling-sering", label: "Utama & Populer", desc: "Resep paling dicari", icon: Flame, color: "text-amber-500", bgLight: "bg-amber-50/70 border-amber-100 hover:bg-amber-100" },
+    { id: "pelajar", label: "Pelajar & Mahasiswa", desc: "Tugas kuliah & sekolah", icon: GraduationCap, color: "text-blue-500", bgLight: "bg-blue-50/70 border-blue-100 hover:bg-blue-100" },
+    { id: "pekerja", label: "Pekerja Kantoran", desc: "Laporan & email sopan", icon: FileText, color: "text-emerald-500", bgLight: "bg-emerald-50/70 border-emerald-100 hover:bg-emerald-100" },
+    { id: "umkm", label: "UMKM & Jualan", desc: "Slogan & copywriting", icon: ShoppingBag, color: "text-orange-505", bgLight: "bg-orange-50/70 border-orange-100 hover:bg-orange-100" },
+    { id: "creator", label: "Content Creator", desc: "Ide & naskah viral TikTok", icon: Instagram, color: "text-rose-500", bgLight: "bg-rose-50/70 border-rose-100 hover:bg-rose-100" },
+    { id: "designer", label: "Untuk Desainer", desc: "Brief logo & brand guide", icon: Palette, color: "text-purple-500", bgLight: "bg-purple-50/70 border-purple-100 hover:bg-purple-100" },
+    { id: "coding", label: "Programmer", desc: "Debug kode & refactor", icon: Code, color: "text-sky-500", bgLight: "bg-sky-50/70 border-sky-100 hover:bg-sky-100" }
   ];
 
   // All Outcome-to-Form Templates
@@ -994,14 +997,19 @@ Optimalkan efisiensi performa kompleksitas waktu Big-O, tingkatkan keterbacaan (
     setSuccessMessage("");
   }, [activeTemplateId]);
 
-  // Handle template selection from sidebar category
+  // Handle template selection from sidebar category with optional level/difficulty filter
   const activeCategoryTemplates = templates.filter(t => {
-    // If search goal query is active, filter all templates based on name/keywords
+    // First apply difficulty filter if selected
+    if (selectedDifficulty === "pemula") {
+      const isMudah = t.difficulty.toLowerCase().includes("mudah");
+      if (!isMudah) return false;
+    }
+
+    // Then apply search or category tab filter
     if (searchGoalQuery.trim() !== "") {
       return t.title.toLowerCase().includes(searchGoalQuery.toLowerCase()) || 
              t.outcomeGoal.toLowerCase().includes(searchGoalQuery.toLowerCase());
     }
-    // Else filter strictly based on tab
     return t.categoryTab === activeCategoryTab;
   });
 
@@ -1243,33 +1251,80 @@ Optimalkan efisiensi performa kompleksitas waktu Big-O, tingkatkan keterbacaan (
             </div>
           </div>
 
-          {/* Sliced Responsive Categories Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-t border-gray-100 pt-4">
-            {categories.map((cat) => {
-              const isSelected = activeCategoryTab === cat.id;
-              return (
+          {/* Visual Cards Grid for Categories Selector & Difficulty Filter Actions */}
+          <div className="space-y-4 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-3">
+              <span className="text-[11px] font-mono tracking-wider font-extrabold text-gray-450 dark:text-slate-400 uppercase">
+                📂 SELEKSI KATEGORI ASISTENSI RESEP:
+              </span>
+
+              {/* LEVEL FILTER COMPONENT FOR BEGINNERS */}
+              <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-850 border border-gray-200 dark:border-slate-800 rounded-xl w-fit">
                 <button
-                  key={cat.id}
-                  onClick={() => {
-                    setActiveCategoryTab(cat.id);
-                    setSearchGoalQuery(""); // Reset search query when navigating tabs
-                    
-                    // Automatically load the first template in that tab
-                    const firstTpl = templates.find(t => t.categoryTab === cat.id);
-                    if (firstTpl) {
-                      setActiveTemplateId(firstTpl.id);
-                    }
-                  }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected 
-                      ? "bg-indigo-600 text-white shadow-xs" 
-                      : "bg-[#f4f7fa] hover:bg-slate-200 text-gray-700"
+                  onClick={() => setSelectedDifficulty("all")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    selectedDifficulty === "all"
+                      ? "bg-white dark:bg-slate-700 text-black dark:text-white shadow-xs"
+                      : "text-gray-500 hover:text-black dark:hover:text-slate-300"
                   }`}
                 >
-                  {cat.label}
+                  🌐 Semua Level
                 </button>
-              );
-            })}
+                <button
+                  onClick={() => setSelectedDifficulty("pemula")}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    selectedDifficulty === "pemula"
+                      ? "bg-emerald-500 text-white shadow-xs"
+                      : "text-gray-500 hover:text-black dark:hover:text-slate-300"
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                  🟢 Khusus Pemula (Sangat Mudah)
+                </button>
+              </div>
+            </div>
+
+            {/* Premium visual tray of categories with individual descriptions/icons */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
+              {categories.map((cat) => {
+                const IconComp = cat.icon;
+                const isSelected = activeCategoryTab === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setActiveCategoryTab(cat.id);
+                      setSearchGoalQuery(""); // Reset search query when navigating tabs
+                      
+                      // Automatically load the first template in that tab
+                      const firstTpl = templates.find(t => t.categoryTab === cat.id);
+                      if (firstTpl) {
+                        setActiveTemplateId(firstTpl.id);
+                      }
+                    }}
+                    className={`p-3 rounded-2xl border text-left flex flex-col justify-between h-24 transition-all hover:-translate-y-0.5 cursor-pointer ${
+                      isSelected 
+                        ? "bg-indigo-600 border-indigo-650 text-white shadow-md ring-2 ring-indigo-550/30" 
+                        : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 text-gray-800 dark:text-slate-200 hover:border-indigo-400 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                      isSelected ? "bg-white/10 text-white" : "bg-slate-50 dark:bg-slate-850 border border-gray-150/40 dark:border-slate-800"
+                    }`}>
+                      <IconComp className={`w-4 h-4 ${isSelected ? "text-white" : cat.color}`} />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] font-extrabold leading-tight tracking-tight line-clamp-1">
+                        {cat.label}
+                      </h4>
+                      <p className={`text-[9px] leading-none mt-0.5 line-clamp-1 opacity-70`}>
+                        {cat.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
