@@ -12,6 +12,29 @@ import Footer from "./components/Footer";
 import { PromptTemplate } from "./types";
 import { Sparkles, ArrowRight, Activity, Cpu, Sparkle, X, FileText, ShoppingBag, Instagram } from "lucide-react";
 
+// 1. Safe LocalStorage wrapper to prevent iframe SecurityExceptions inside cross-origin sandboxes
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return localStorage.getItem(key);
+      }
+    } catch (e) {
+      console.warn("Storage.getItem is restricted or disabled inside sandboxed iframe:", e);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      console.warn("Storage.setItem is restricted or disabled inside sandboxed iframe:", e);
+    }
+  }
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("landing");
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,20 +48,18 @@ export default function App() {
 
   // 2. Clear Theme Control State
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sliced_dark_mode") === "true";
-    }
-    return false;
+    const saved = safeLocalStorage.getItem("sliced_dark_mode");
+    return saved === "true";
   });
 
   useEffect(() => {
-    // Check if user has first onboarded yet
-    const onboarded = localStorage.getItem("sliced_onboarded_v5");
+    // Check if user has first onboarded yet, default to open modal on fresh loads in testing
+    const onboarded = safeLocalStorage.getItem("sliced_onboarded_v6_test");
     if (onboarded !== "true") {
       // Trigger onboarding pop-up with a brief delayed micro-interaction to feel highly polished
       const timer = setTimeout(() => {
         setShowOnboardingModal(true);
-      }, 1000);
+      }, 800);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -46,10 +67,10 @@ export default function App() {
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("sliced_dark_mode", "true");
+      safeLocalStorage.setItem("sliced_dark_mode", "true");
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("sliced_dark_mode", "false");
+      safeLocalStorage.setItem("sliced_dark_mode", "false");
     }
   }, [isDarkMode]);
 
@@ -88,7 +109,7 @@ export default function App() {
 
   // Actions when selecting onboarding interests
   const handleOnboardingSelection = (category: "cv" | "jualan" | "sosmed") => {
-    localStorage.setItem("sliced_onboarded_v5", "true");
+    safeLocalStorage.setItem("sliced_onboarded_v6_test", "true");
     setShowOnboardingModal(false);
 
     if (category === "cv") {
@@ -106,7 +127,7 @@ export default function App() {
   };
 
   const closeOnboardingModal = () => {
-    localStorage.setItem("sliced_onboarded_v5", "true");
+    safeLocalStorage.setItem("sliced_onboarded_v6_test", "true");
     setShowOnboardingModal(false);
   };
 
@@ -119,6 +140,7 @@ export default function App() {
         activeTab={activeTab} 
         isDarkMode={isDarkMode}
         setIsDarkMode={setIsDarkMode}
+        onOpenOnboarding={() => setShowOnboardingModal(true)}
       />
 
       {/* Main Container */}

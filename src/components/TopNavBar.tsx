@@ -6,9 +6,10 @@ interface TopNavBarProps {
   activeTab: string;
   isDarkMode: boolean;
   setIsDarkMode: (val: boolean) => void;
+  onOpenOnboarding: () => void;
 }
 
-export default function TopNavBar({ onMenuClick, activeTab, isDarkMode, setIsDarkMode }: TopNavBarProps) {
+export default function TopNavBar({ onMenuClick, activeTab, isDarkMode, setIsDarkMode, onOpenOnboarding }: TopNavBarProps) {
   const [hasKey, setHasKey] = useState<boolean | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -92,6 +93,14 @@ export default function TopNavBar({ onMenuClick, activeTab, isDarkMode, setIsDar
             >
               Playground &amp; Optimizer
             </button>
+            <button
+              onClick={onOpenOnboarding}
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 transition-all hover:text-indigo-850 dark:hover:text-indigo-300 flex items-center gap-1.5 cursor-pointer bg-indigo-50/75 dark:bg-indigo-950/40 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1.5 rounded-xl active:scale-95 ml-2"
+              title="Tampilkan Panduan Persiapan Cepat Sliced"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-605 dark:text-indigo-400 animate-pulse" />
+              <span>Cari Resep 👋</span>
+            </button>
           </div>
         </div>
 
@@ -170,6 +179,15 @@ export default function TopNavBar({ onMenuClick, activeTab, isDarkMode, setIsDar
             className="block w-full text-left py-2 px-3 rounded-lg hover:bg-gray-55 dark:hover:bg-slate-800 text-gray-900 dark:text-white font-medium"
           >
             Playground &amp; Optimizer
+          </button>
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenOnboarding();
+            }}
+            className="block w-full text-left py-2 px-3 rounded-lg hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 text-indigo-650 dark:text-indigo-400 font-bold"
+          >
+            👋 Tampilkan Pop-up Pemula
           </button>
           <hr className="border-gray-100 dark:border-slate-800" />
           <div className="space-y-3 pt-2">
