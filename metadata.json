@@ -1,0 +1,6 @@
+{
+  "name": "Sliced Prompt",
+  "description": "Cara Tercepat Menyelesaikan Pekerjaan Dengan AI - Ratusan Template AI Siap Pakai Untuk Kerja, Kuliah, Bisnis & Toko.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
